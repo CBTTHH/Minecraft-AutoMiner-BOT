@@ -49,7 +49,7 @@ class PlayerTracker:
         blocks = {'minecraft:cobblestone',
                   'minecraft:stone', 
                   'minecraft:cobbled_deepslate', 
-                  'minecraft:deepslate'
+                  'minecraft:deepslate',
                   'minecraft:diorite', 
                   'minecraft:granite', 
                   'minecraft:sandstone'}
