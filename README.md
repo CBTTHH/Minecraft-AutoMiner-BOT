@@ -85,9 +85,22 @@ and blocks (cobble deepslate preferable) in slot 9.
 - Type in the chat "\mod" (start bot)
 - Type in the chat "\killjob 1" (stop bot)
 
+---
 
+## Future Improvements ⏱️
+These features are actively being developed in version 2.0:
+- Cleaner modular architecture
+- Improved scalability and extensibility
+- Safer navigation logic
+- Faster diamond searching
+- Advanced pathfinding
 
+---
 
+## Author
+CBTTHH  
+GitHub: https://github.com/CBTTHH  
+YouTube: https://www.youtube.com/@CBTTHH
 
 
 
