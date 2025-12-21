@@ -72,7 +72,7 @@ I created a video explaining how the bot works, the logic behind its behavior, a
 ---
 
 ## How to Run ⏯️
-### Instalation Requirements
+### Installation Requirements
 - Python 3.13 or 3.14
 - MineScript mod [Download Link] (https://modrinth.com/mod/minescript)
 - mod.py (inside minescript folder)
