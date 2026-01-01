@@ -26,24 +26,6 @@ This project focuses on applying data structures, algorithms, and logic in a int
 - Hotbar monitoring and management
 - Tool switching based on block type
 - Continuous environment awareness
-
----
-
-## Algorithms & Computer Science Concepts 💻
-This project was designed to put into practice real application of core CS concepts:
-
-- **Data Structures**
-  - OOP for player state tracking
-  - Hash maps and sets for hotbar and searching variables
-  - Queues and lists for movement logic
-
-- **Algorithms**
-  - Graph traversal concepts DFS for diamond searching
-  - Rule based decision for hazard handling
-
-- **Software Design**
-  - State based logic for player behavior
-  - Modular functions for movement, mining, and hazard handling
  
 ---
 
@@ -65,7 +47,7 @@ Version 2.0 focuses on architectural improvements, better awareness handling, fa
 ---
 
 ## Video Explanation 🎥 
-I created a video explaining how the bot works, the logic behind its behavior, and how to set it put:  
+I created a video explaining how the bot works, the logic behind its behavior, and how to set it up.
   
 🔗 [YouTube Video]: https://youtu.be/IdFy5w9tKBE
 
@@ -94,6 +76,24 @@ These features are actively being developed in version 2.0:
 - Safer navigation logic
 - Faster diamond searching
 - Advanced pathfinding
+
+---
+
+## Algorithms & Computer Science Concepts 💻
+This project was designed to put into practice real application of core CS concepts:
+
+- **Data Structures**
+  - OOP for player state tracking
+  - Hash maps and sets for hotbar and searching variables
+  - Queues and lists for movement logic
+
+- **Algorithms**
+  - Graph traversal concepts DFS for diamond searching
+  - Rule based decision for hazard handling
+
+- **Software Design**
+  - State based logic for player behavior
+  - Modular functions for movement, mining, and hazard handling
 
 ---
 
