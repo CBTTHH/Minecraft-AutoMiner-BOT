@@ -1,19 +1,25 @@
-import time, minescript, math, threading
+import time
+import math
+import threading
+
+import minescript as m
+import bot.core.safety_mining as safety
 import bot.core.constants as C
 
 class PlayerTracker:
     def __init__(self):
         self.health = 20
-        self.x = 0
-        self.y = 0
-        self.z = 0
-        self.yaw = C.YAW_FACING_EAST
-        self.pitch = C.PITCH_LOOK_AHEAD
+        
+        self.x, self.y, self.z = map(math.floor, m.player().position)
+        self.yaw, self.pitch = C.YAW_FACING_EAST, C.PITCH_LOOK_AHEAD
         self.x_velocity, self.y_velocity, self.z_velocity = 0, 0, 0
+        
         self.targeted_block = None
         self.targeted_entity = None
-        self.lava_around = []
         self.main_hand_item = None
+        self.off_hand_item = None
+        
+        self.lava_around = set()
         
         #Threads
         self.stop_tracking = False
@@ -30,18 +36,16 @@ class PlayerTracker:
         self.hazard_detection_update_thread.start()
         self.auto_stop_update_thread.start()
     
+    
     def player_info(self):
         while not self.stop_tracking:
             
-            self.health = minescript.player().health
+            self.health = m.player().health
             
-            px, py, pz = minescript.player().position
-            self.x = math.floor(px)
-            self.y = math.floor(py)
-            self.z = math.floor(pz)
+            self.x, self.y, self.z = map(math.floor, m.player().position)
             
-            yaw = ((minescript.player().yaw + 180) % 360) - 180
-            pitch = ((minescript.player().pitch + 90) % 180) - 90
+            yaw = ((m.player().yaw + 180) % 360) - 180
+            pitch = ((m.player().pitch + 90) % 180) - 90
 
             if yaw >= -135 and yaw < -45: self.yaw = C.YAW_FACING_EAST
             elif yaw >= -45 and yaw <= 45: self.yaw = C.YAW_FACING_SOUTH
@@ -49,106 +53,109 @@ class PlayerTracker:
             else: self.yaw = C.YAW_FACING_NORTH
             self.pitch = pitch
 
-            self.x_velocity, self.y_velocity, self.z_velocity = minescript.player().velocity
+            self.x_velocity, self.y_velocity, self.z_velocity = m.player().velocity
             
             time.sleep(C.ONE_TICK_TIME)
             
     
     def tool_in_main_hand(self):
-        shovel_blocks = {'minecraft:dirt', 
-                         'minecraft:gravel', 
-                         'minecraft:clay',
-                         'minecraft:grass_block[snowy=false]', 
-                         'minecraft:sand', 
-                         'minecraft:soul_sand',}
-        
-        blocks = {'minecraft:cobblestone',
-                  'minecraft:stone', 
-                  'minecraft:cobbled_deepslate', 
-                  'minecraft:deepslate',
-                  'minecraft:diorite', 
-                  'minecraft:granite', 
-                  'minecraft:sandstone'}
-        
-        food = {'minecraft:cooked_beef', 
-                'minecraft:cooked_chicken', 
-                'minecraft:cooked_porkchop', 
-                'minecraft:cooked_salmon', 
-                'minecraft:golden_carrot', 
-                'minecraft:golden_apple', 
-                'minecraft:pumpkin_pie'}
         
         while not self.stop_tracking:
             
-            self.targeted_block = minescript.player_get_targeted_block(5)
-            main_hand_item = minescript.player_hand_items().main_hand
+            self.targeted_block = m.player_get_targeted_block(5)
             
-            if main_hand_item: 
-                self.main_hand_item = main_hand_item.get('item')
+            main_hand_item = m.player_hand_items().main_hand
+            off_hand_item = m.player_hand_items().off_hand
+            
+            self.main_hand_item = main_hand_item.get('item') if main_hand_item else None
+            self.off_hand_item = off_hand_item.get("item") if off_hand_item else None
+                
             
             if self.main_hand_item:
                 try:
-                    if (self.main_hand_item.endswith('water_bucket')) or (self.main_hand_item in food) or \
-                       (self.main_hand_item.endswith('bucket')) or(self.main_hand_item in blocks):
+                    if self.main_hand_item in C.HAND_ITEMS:
                         time.sleep(C.ONE_TICK_TIME*2)
                         continue
         
-                    if minescript.player_get_targeted_block(5):
-                        if minescript.player_get_targeted_block(5)[3] in shovel_blocks: 
-                            minescript.player_inventory_select_slot(C.SHOVEL_SLOT)
+                    if m.player_get_targeted_block(5):
+                        if m.player_get_targeted_block(5)[3] in C.SHOVEL_BREAKABLE: 
+                            m.player_inventory_select_slot(C.SHOVEL_SLOT)
                         else: 
-                            minescript.player_inventory_select_slot(C.PICKAXE_SLOT)
+                            m.player_inventory_select_slot(C.PICKAXE_SLOT)
                     time.sleep(C.ONE_TICK_TIME*2)
                     
                 except Exception as e:
-                    minescript.echo('Error:', e)
+                    m.echo('Error:', e)
                     time.sleep(C.ONE_TICK_TIME*2)
                     self.stop_tracking = True
                     
                 
     def hazard_detection(self):
         while not self.stop_tracking:
+            self.targeted_entity = m.player_get_targeted_entity(5)
             
-            self.targeted_entity = minescript.player_get_targeted_entity(5)
+            px, py, pz = player.x, player.y, player.z
+            pos1 = (px - 1, py - 1, pz -1)
+            pos2 = (px + 1, py + 2, pz + 1)
             
-            lava_around = []
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1, 2]:
-                    for dz in [-1, 0, 1]:
-                        lava_around.append(minescript.getblock(self.x + dx, self.y + dy, self.z + dz).startswith("minecraft:lava"))
-            self.lava_around = lava_around
+            m.await_loaded_region(px - 2, pz - 2, px + 2, pz + 2)
+            region = m.get_block_region(pos1, pos2)
+            
+            for dx, dy, dz in C.BLOCKS_AROUND_PLAYER:
+     
+                        x, y, z = px + dx, py + dy, pz + dz
+                        
+                        block = region.get_block(x, y, z)
+                        if block and block.startswith("minecraft:lava"):
+                            self.lava_around.add((x, y, z))
 
             time.sleep(C.ONE_TICK_TIME*5)
 
 
-
     def auto_stop(self):
-        def stop():
-            minescript.echo('Stopping script')
+        
+        def stop() -> None:
+            m.echo('Stopping script')
+            
+            m.player_press_right(False)
+            m.player_press_forward(False)
+            m.player_press_left(False)
+            m.player_press_backward(False)
+            m.player_press_sneak(False)
+            m.player_press_jump(False)
+            m.player_press_attack(False)
+            m.player_press_use(False)
+            
             self.stop_tracking = True
             self.player_info_update_thread.join(timeout=1)
             self.tool_update_thread.join(timeout=1)
             self.hazard_detection_update_thread.join(timeout=1)
+            
+            running_scripts = m.job_info()
+            for job in running_scripts:
+                m.execute(f"\killjob {job.job_id}")
         
         while not self.stop_tracking:
             
             time.sleep(C.ONE_TICK_TIME*5)
             
             if self.targeted_entity:
-                minescript.echo("ENTITY DETECTED")
+                m.echo("ENTITY DETECTED")
                 stop()
                 
-            elif any(self.lava_around):
-                minescript.echo("VERY CLOSE TO LAVA")
+            elif self.lava_around:
+                m.echo("VERY CLOSE TO LAVA")
+                safety.lavaSave()
                 stop()
             
             elif (self.main_hand_item and (self.main_hand_item.endswith("sword") or self.main_hand_item.endswith("_axe"))):
-                minescript.echo("PLAYER PULLET OUT HIS COMBAT WEAPON")
+                m.echo("PLAYER PULLET OUT HIS COMBAT WEAPON")
                 stop()
                 
             elif self.health <= C.MIN_HEALTH:
-                minescript.echo("PLAYER HAS LOW HEALTH... RECOVER AND TRY AGAIN")
+                m.echo("PLAYER HAS LOW HEALTH... RECOVER AND TRY AGAIN")
                 stop()
                 
+                
 player = PlayerTracker()
-time.sleep(0.5)
+time.sleep(0.5) # Loading threads (prevent crashing)

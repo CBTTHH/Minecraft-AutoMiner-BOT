@@ -1,103 +1,59 @@
-import minescript
+import minescript as m
 import bot.core.constants as C
+from bot.core.decision import findingMinableNodes
 from bot.core.player import player
 
-def searchForOres_old(off_xz = 7, off_y = 6, cache=None, ore = 'diamond') -> set: 
-    # Facing east: xyz normal coordinate plane
-    coords_with_ores = set()
-    if not cache: cache = set()
+def searchOresLava(r=16, ore='diamond') -> tuple[set[tuple], set[tuple]]:
+    sx, sy, sz = player.x, player.y, player.z
     
-    def search_nearby(bx,by,bz): # searches blocks around a diamond block
-        for dx in [-1, 0 , 1]:
-            for dy in [-1, 0 , 1]:
-                for dz in [-1, 0 , 1]:
-                    _x, _y, _z = bx+dx, by+dy, bz+dz
-                    if _y < -59: continue
-                    if not minescript.getblock(_x,_y,_z).endswith(f'{ore}_ore'): continue
-                    if (_x,_y,_z) not in coords_with_ores:
-                        coords = (_x,_y,_z)
-                        coords_with_ores.add(coords) and cache.add(coords)
-                        search_nearby(_x,_y,_z)
-                    
-    for x in range(player.x-off_xz, player.x+off_xz+1):
-        for y in range(player.y-2, player.y+off_y+1):
-            for z in range(player.z-off_xz, player.z+off_xz+1):
-                if (x,y,z) in cache: continue
-                cache.add((x,y,z))
-                if (y % 2 == 0 and ((x % 2 == 0 and z % 2 == 0) or (x % 2 == 1 and z % 2 == 1))) or \
-                   (y % 2 == 1 and ((x % 2 == 0 and z % 2 == 1) or (x % 2 == 1 and z % 2 == 0))):
-                    if minescript.getblock(x,y,z).endswith(f'{ore}_ore'):
-                        search_nearby(x,y,z)
-
-                    
-    if not coords_with_ores:
-        minescript.echo(f'No {ore}s nearby, increasing searching radius to a off set of {off_xz+3}')
-        return searchForOres_old(off_xz+3, off_y+2, cache)
+    prev_r = 0    
+    ores_coords = set()
+    lava_coords = set()
+    region_coord = set()
+    min_y = C.INVALID_Y_LEVEL[0] + 1
     
-    minescript.echo(coords_with_ores, len(coords_with_ores))
-    return coords_with_ores
-
-
-def searchForOres(r=7, ore='diamond') -> set: 
     
-    def search_nearby(bx,by,bz): # searches blocks around a diamond block
-        for dx in [-1, 0 , 1]:
-            for dy in [-1, 0 , 1]:
-                for dz in [-1, 0 , 1]:
-                    
-                    coord_neighbor = (_x, _y, _z) = (bx + dx, by + dy, bz + dz)
-                    
-                    if not minescript.getblock(_x,_y,_z).endswith(f'{ore}_ore') or _y <= C.INVALID_Y_LEVEL[0]: 
-                        continue
-                    
-                    if coord_neighbor not in coords_with_ores:
-                        coords_with_ores.add(coord_neighbor) 
-                        cache.add(coord_neighbor)
-                        search_nearby(_x,_y,_z)
-                        
-    # Facing east: xyz normal coordinate plane
-    coords_with_ores = set()
-    cache = set()
-    prev_r = 0 ## xz and y separated #################################
-    
-    while True:          
-    
+    while True:
+        min_dy = max(min_y - sy, - r)
+        pos1 = (sx - r, min_y, sz - r)
+        pos2 = (sx + r, sy + r, sz + r)
+        
+        m.await_loaded_region(sx - r, sz - r, sx + r, sz + r)
+        
+        region = m.get_block_region(pos1, pos2)
+        
         for dx in range(-r, r + 1):
-            for dy in range(max(C.INVALID_Y_LEVEL[0] + 1 - player.y, -r), r + 1):
+            for dy in range(min_dy, r + 1):
                 for dz in range(-r, r + 1):
                     
-                    if max(abs(dx), abs(dy), abs(dz)) <= prev_r:
+                    if max(abs(dx), abs(dy), abs(dz)) <= prev_r: # Shell expansion
                         continue
                     
-                    coord = (x, y, z) = (player.x + dx, player.y + dy, player.z + dz)
+                    coord = (x, y, z) = (sx + dx, sy + dy, sz + dz)
+                    block = region.get_block(x, y, z)
+                    region_coord.add(coord)
                     
-                    if coord in cache: 
-                        continue
+                    if not block: continue
                     
-                    cache.add(coord)
-                    
-                    if (y % 2 == 0 and ((x % 2 == 0 and z % 2 == 0) or (x % 2 == 1 and z % 2 == 1))) or \
-                       (y % 2 == 1 and ((x % 2 == 0 and z % 2 == 1) or (x % 2 == 1 and z % 2 == 0))):
-                        if minescript.getblock(x,y,z).endswith(f'{ore}_ore'):
-                            search_nearby(x,y,z)
-    
-        if coords_with_ores:
-            minescript.echo(coords_with_ores, len(coords_with_ores))
-            return coords_with_ores
+                    if block.endswith(f"{ore}_ore"):
+                        ores_coords.add(coord)
+                    elif block.startswith("minecraft:lava") and (C.Y_LEVEL_LAVA_CHECK[0] <= y <= C.Y_LEVEL_LAVA_CHECK[1]):
+                        lava_coords.add(coord)
+                        
+        if ores_coords:
+            return ores_coords, findingMinableNodes(lava_coords, region_coord)
         
         prev_r = r
-        r += 3
-        minescript.echo(f'No {ore}s nearby, increasing searching radius to a off set of {r}')
-   
+        r += 4
+        m.echo(f'No {ore}s nearby, increasing searching radius to a offset of {r}')
+    
 
 
-
-
-def clusters(ores_coords:set) -> list:
+def clusters(ores_coords:set) -> list[dict]:
     clusters = []
     seen = set()
     
-    def neighbors(coords_main:tuple, ores_coords:set): #check diamond neighbors
+    def neighbors(coords_main:tuple, ores_coords:set): # check diamond neighbors
         x_main, y_main, z_main = coords_main
         seen.add(coords_main)
         
@@ -129,7 +85,7 @@ def clusters(ores_coords:set) -> list:
             cluster['center'] = (sum(xs)//size, sum(ys)//size, sum(zs)//size)
             clusters.append(cluster)
             
-    # print(clusters, len(clusters))
+    # m.echo(clusters, len(clusters))
     return clusters
 
 

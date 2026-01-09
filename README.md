@@ -4,6 +4,15 @@
 > This branch contains **version 2.0**, a major architectural refactor of the project.  
 > The stable, fully working **version (v1.0)** is available on the **main** branch.
 
+--- 
+
+## System Architecture
+
+![Architecture Diagram](bot\docs\ArchitectureDiagram.drawio.svg)  
+This diagram shows the separation between high-level systems (modes)
+and low-level systems (core). Modes decide what the player do, while core systems
+execution interact with the MineScript API.
+
 ---
 
 ## Overview 
