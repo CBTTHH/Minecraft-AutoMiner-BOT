@@ -8,7 +8,7 @@
 
 ## System Architecture
 
-![Architecture Diagram](bot\docs\ArchitectureDiagram.drawio.svg)  
+![Architecture Diagram](bot/docs/ArchitectureDiagram.drawio.svg)  
 This diagram shows the separation between high-level systems (modes)
 and low-level systems (core). Modes decide what the player do, while core systems
 execution interact with the MineScript API.
