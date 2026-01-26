@@ -3,7 +3,7 @@ import bot.core.minescript_extra as m_extra
 import bot.core.constants as C
 from bot.core import player
 
-def searchOresLava(r=16, step=4, ore="diamond", caption=True) -> tuple[set[tuple], set[tuple], set[tuple]]:
+def searchOresLava(r=16, step=4, ore=C.MINING_ORE, caption=True) -> tuple[set[tuple], set[tuple], set[tuple]]:
     sx, sy, sz = player.x, player.y, player.z
     
     prev_r = 0    
@@ -58,7 +58,7 @@ def clusters(ores_coords:set) -> list[dict]:
     clusters = []
     seen = set()
     
-    def neighbors(coords_main:tuple, ores_coords:set): # check diamond neighbors
+    def neighbors(coords_main:tuple, ores_coords:set): # check ore neighbors
         x_main, y_main, z_main = coords_main
         seen.add(coords_main)
         

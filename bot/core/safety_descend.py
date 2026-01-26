@@ -51,7 +51,7 @@ def inWater() -> None:
                 blocks_around.add((bx, bz))
         return (len(blocks_around) < 3) 
     
-    m.echo(f"{m_extra.txt_clr('y')}Player IS in {m_extra.txt_clr('b')}WATER{m_extra.txt_clr('y')}!!!")
+    m.echo(f"{m_extra.txt_clr('y')}Player IS in {m_extra.txt_clr('b')}WATER{m_extra.txt_clr('y')}!")
     while m.player_get_targeted_block(2) == None: # Player in floor level
         m.player_press_sneak(True)
         time.sleep(C.ONE_TICK_TIME)
@@ -105,7 +105,7 @@ def inWater() -> None:
 
 
 def closeToLava() -> None:
-    m.echo(f"{m_extra.txt_clr('y')}Player CLOSE to {m_extra.txt_clr('r')}LAVA{m_extra.txt_clr('y')}!!!")
+    m.echo(f"{m_extra.txt_clr('y')}Player CLOSE to {m_extra.txt_clr('r')}LAVA{m_extra.txt_clr('y')}!")
     
     path = []
     

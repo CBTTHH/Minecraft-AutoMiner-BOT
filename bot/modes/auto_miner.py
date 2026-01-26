@@ -24,8 +24,8 @@ def run():
 
         path, cluster = result
 
-        move.goToTarget(path, cluster["center"])
-        mining.mineCluster(cluster["coords"])
+        move.goToTarget(path, cluster['center'])
+        mining.mineCluster(cluster['coords'])
         move.finalizeDescent()
 
 

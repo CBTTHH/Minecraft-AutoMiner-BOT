@@ -7,7 +7,7 @@ import bot.core.constants as C
 from bot.core import player
 
 
-def priorityGroup(clusters, ore='diamond', caption=True) -> dict:
+def priorityGroup(clusters, ore=C.MINING_ORE, caption=True) -> dict:
     if len(clusters) == 1: 
         if caption:
             m.echo(f"{m_extra.txt_clr('g')}Going to group of {ore}s at {m_extra.txt_clr('a')}{clusters[0]['center']} {m_extra.txt_clr('g')}(closest)")
@@ -53,12 +53,12 @@ def direction(target_coord:tuple|None) -> tuple[str]:
     zs, xs, ys = "N/S: ", "W/E: ", "UP/DOWN: "
     dx, dy, dz = abs(px - tx), abs(py - ty) + 1, abs(pz - tz)
     
-    xs += f"{m_extra.txt_clr("y")}east ({dx})" if px < tx else f"{m_extra.txt_clr("y")}west ({dx})" \
-        if px > tx else f"{m_extra.txt_clr("g")}same"
-    zs += f"{m_extra.txt_clr("y")}south ({dz})" if pz < tz else f"{m_extra.txt_clr("y")}north ({dz})" \
-        if pz > tz else f"{m_extra.txt_clr("g")}same"
-    ys += f"{m_extra.txt_clr("y")}up ({dy})" if py < ty else f"{m_extra.txt_clr("y")}down ({dy})" \
-        if py > ty else f"{m_extra.txt_clr("g")}same"
+    xs += f"{m_extra.txt_clr('y')}east ({dx})" if px < tx else f"{m_extra.txt_clr('y')}west ({dx})" \
+        if px > tx else f"{m_extra.txt_clr('g')}same"
+    zs += f"{m_extra.txt_clr('y')}south ({dz})" if pz < tz else f"{m_extra.txt_clr('y')}north ({dz})" \
+        if pz > tz else f"{m_extra.txt_clr('g')}same"
+    ys += f"{m_extra.txt_clr('y')}up ({dy})" if py < ty else f"{m_extra.txt_clr('y')}down ({dy})" \
+        if py > ty else f"{m_extra.txt_clr('g')}same"
     
     direction = (zs, xs, ys)
     return direction
@@ -195,11 +195,11 @@ def findReachableCluster(r=16, step=4):
         clusters = searching.clusters(ore_coords)
         best_cluster = priorityGroup(clusters)
         
-        goal = (best_cluster["center"][0], best_cluster["center"][2])
+        goal = (best_cluster['center'][0], best_cluster['center'][2])
         path = AStarPathFinder(walkable_2d_coords, goal)
         
         if r >= C.MAX_PATH_SEARCHING_RADIUS:
-            invalid_coords |= (set(best_cluster["coords"]))
+            invalid_coords |= (set(best_cluster['coords']))
 
         if path:
             return path, best_cluster

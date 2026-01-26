@@ -22,7 +22,7 @@ def run():
         cluster = searching.clusters(ore_coords)
         best_cluster = decision.priorityGroup(cluster, caption=False)
         
-        cx, cy, cz = best_cluster.get('center', None)
+        cx, cy, cz = best_cluster.get("center", None)
         n_diamonds = len(best_cluster['coords'])
         distance = best_cluster.get('distance', float("inf"))
         direction = decision.direction((cx, cy, cz))

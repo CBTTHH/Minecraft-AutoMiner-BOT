@@ -6,7 +6,7 @@ import bot.core.minescript_extra as m_extra
 
 from bot.core.restart import restart
 
-MODES = { # TODO: CHANGE COMPLETELY
+MODES = { 
     "descend": (m.execute, "\\bot\\modes\\test"),
     "auto": (m.execute, "\\bot\\modes\\auto_miner"),
     "scan": (m.execute, "\\bot\\modes\\scan_only"),
@@ -16,7 +16,19 @@ MODES = { # TODO: CHANGE COMPLETELY
     "help": (m_extra._help, None),
 }
 
-stop_flag = False
+
+def main_running() -> bool:
+    running_jobs = m.job_info()
+    n_running_jobs = len(running_jobs) - 1
+    
+    if (not n_running_jobs):
+        return False
+    
+    for job in running_jobs:
+        if (job.command == ["bot\\main"]):
+            m.echo(f"{m_extra.txt_clr('y')}\nMain script is already running\n")
+            return True
+    return False
 
 
 def commands(msg:str):
@@ -38,8 +50,8 @@ def commands(msg:str):
             executor(cmd) if cmd else executor()
         except BaseException as e:
             m.echo(f"Error: {e}")
-            executor, cmd = MODES["stop main"]
-            executor(cmd)
+            executor, cmd = MODES["stop all"]
+            executor(cmd) if cmd else executor()
             
             
     else: 
@@ -48,7 +60,8 @@ def commands(msg:str):
 
 
 def main():
-    global stop_flag
+    stop_flag = False
+    
     m.echo(f"{m_extra.txt_clr('g')}Bot ACTIVATED\nUse: '.bot <mode>'")
     
     with m.EventQueue() as events:
@@ -73,4 +86,6 @@ def main():
         
 
 if __name__ == "__main__":
-    main()
+    running = main_running()
+    if (not running):
+        main()

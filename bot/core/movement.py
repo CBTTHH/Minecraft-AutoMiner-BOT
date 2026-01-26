@@ -31,11 +31,20 @@ def disableSprint() -> None:
     m.player_press_backward(True)
     time.sleep(C.ONE_TICK_TIME * 4)
     m.player_press_backward(False)   
-    
 
-def stuck_y() -> None:
+
+def minable(floor_y_level=C.FLOOR_Y_LEVEL) -> None:
+    target_block = m.player_get_targeted_block()
+    if (target_block) and (target_block.position[1] > floor_y_level):
+        m.player_press_attack(True)
+    else:
+        m.player_press_attack(False)
+
+
+def stuck_y(floor_y_level=C.FLOOR_Y_LEVEL) -> None:
     if (m.player_get_targeted_block(3)):
         return
+    
     if ((m.player_get_targeted_block(5)) and \
         (m.player_get_targeted_block()[0] != m.getblock(player.x, player.y - 1, player.z)) and \
         (C.GROUND_Y_VEL[0] <= player.y_vel <= C.GROUND_Y_VEL[1])):
@@ -47,11 +56,11 @@ def stuck_y() -> None:
         
         StopMovement()
         goToCenter()
-    
-    m.player_press_attack(True)
+        
+    minable(floor_y_level)
       
       
-def update_stuck_timer(floor_y_level=C.FLOOR_Y_LEVEL):
+def update_stuck_timer(floor_y_level=C.FLOOR_Y_LEVEL) -> bool:
     current_pos = (player.x, player.y, player.z)
 
     if (current_pos != player._last_pos):
@@ -70,15 +79,11 @@ def recover_from_stuck(yaw, floor_y_level):
     m.player_press_forward(False)
     goToCenter(yaw, C.PITCH_LOOK_INCLINED_DOWN)
 
-    target_block = m.player_get_targeted_block()
-    if target_block and target_block.position[1] != floor_y_level:
-        m.player_press_attack(True)
-    else:
-        m.player_press_attack(False)
+    minable(floor_y_level)
     player._last_pos = (0, 0, 0)
 
 
-def finalizeDescent(target_y:int = C.STOP_Y_LEVEL, first_time:bool = False) -> None:
+def finalizeDescent(target_y:int=C.STOP_Y_LEVEL, first_time:bool=False) -> None:
     if player.y == target_y:
         m.player_press_attack(False)
         pass
@@ -167,7 +172,7 @@ def goToCenter(yaw:float=None, pitch:float=C.PITCH_LOOK_DOWN) -> None:
     StopMovement()
     
     
-def goToTarget(path:list[tuple], target_coord:tuple[int] = None) -> None:
+def goToTarget(path:list[tuple], target_coord:tuple[int]=None) -> None:
     
     def checkFloor(floor_y_level=C.FLOOR_Y_LEVEL) -> None:
         if m.getblock(path_x, floor_y_level, path_z).endswith("air"):
@@ -183,7 +188,12 @@ def goToTarget(path:list[tuple], target_coord:tuple[int] = None) -> None:
             StopMovement()
             m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
     
-    def miningPath(yaw=player.yaw, pitch=C.PITCH_LOOK_DOWN, path:list[tuple]=[], floor_y_level=C.FLOOR_Y_LEVEL):
+    def miningPath(
+        yaw=player.yaw, 
+        pitch=C.PITCH_LOOK_DOWN, 
+        path:list[tuple]=[], 
+        floor_y_level=C.FLOOR_Y_LEVEL
+        ):
         bx, by, bz = m.player_get_targeted_block().position
         m.player_press_attack(True) if (by != floor_y_level) and ((bx, bz) in path) else m.player_press_attack(False)
         

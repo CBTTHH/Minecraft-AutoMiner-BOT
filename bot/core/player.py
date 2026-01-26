@@ -14,7 +14,6 @@ class PlayerTracker:
         self.health = 20
         
         self.x, self.y, self.z = map(math.floor, m.player().position)
-        self.prev_pos = (0, 0, 0)
         self.yaw, self.pitch = C.YAW_FACING_EAST, C.PITCH_LOOK_AHEAD
         self.x_vel, self.y_vel, self.z_vel = 0, 0, 0
         self._last_pos = (self.x, self.y, self.z)
@@ -170,7 +169,7 @@ class PlayerTracker:
                 stop()
             
             elif (time_stuck > C.STUCK_TIMEOUT * 2.5) or (self.restart):
-                if self.targeted_block and self.targeted_block.type.endswith("diamond_ore"):
+                if self.targeted_block and self.targeted_block.type.endswith(f"{C.MINING_ORE}_ore"):
                     continue
                 restart()
                 self.stop_tracking = True    
