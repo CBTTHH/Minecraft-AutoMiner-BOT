@@ -7,17 +7,20 @@ import bot.core.searching as searching
 import bot.core.decision as decision
 import bot.core.safety_descend as safety_descend
 import bot.core.constants as C
+from bot.core.restart import restart
+from bot.core import player
+
 import bot.modes.descend as descend
 import bot.modes.auto_miner as auto_miner
 import bot.modes.scan_only as scan_only
-from bot.core.player import player
+
 
 
 def run_player_info(tick=C.ONE_TICK_TIME) -> None: #✅
-    while not player.stop_tracking:
+    while (not player.stop_tracking):
         health = player.health
         pos_x, pos_y, pos_z = player.x, player.y, player.z 
-        vel_x, vel_y, vel_z = player.x_velocity, player.y_velocity, player.z_velocity
+        vel_x, vel_y, vel_z = player.x_vel, player.y_vel, player.z_vel
         yaw, pitch = player.yaw, player.pitch
         targeted_block = player.targeted_block
         targeted_entity = player.targeted_entity
@@ -61,7 +64,8 @@ def run_movement() -> None: # ✅
     
 def run_searching_and_decision() -> tuple[dict, list]: # ✅
     start_time = time.perf_counter()
-    diamond_coords, walkable_2d_coords = searching.searchOresLava()
+    diamond_coords, lava_coord, region_coords = searching.searchOresLava()
+    walkable_2d_coords = decision.findingMinableNodes(lava_coord, region_coords)
     end_time = time.perf_counter()
     time1 = end_time - start_time
     
@@ -92,6 +96,9 @@ def run_searching_and_decision() -> tuple[dict, list]: # ✅
     m.echo(f"Total time: {time1+time2+time3+time4}")
     
     return target_coord, path
+
+def run_restart() -> None:
+    restart()
     
     
 def run_searching_movement() -> None:
@@ -99,28 +106,27 @@ def run_searching_movement() -> None:
     move.goToTarget(path, targeted_coord)
     
 
-def run_modes(mode:str = "auto miner") -> None:
+def run_modes(mode:str = 'a') -> None:
     """
     Docstring for run_modes
     
-    :param mode: "d: descend", "a: auto miner", "s: scan only"
+    :param mode: 'd': descend", 'a': auto_miner, 's': scan_only
     :type mode: str
     """
     
-    if mode[0] == "d":
+    if mode.startswith('d'):
         descend.run()
-    elif mode[0] == "s":
+    elif mode.startswith('s'):
         scan_only.run()
     else:
         m.echo("Running auto miner")
         auto_miner.run()
-        
     
+
 if __name__ == "__main__":
-    # run_player_info()
+    run_player_info()
     # run_safety("w")
     # run_movement()
     # run_searching_and_decision()   
-    run_modes()
-
-     
+    # run_modes("")
+    # run_restart()

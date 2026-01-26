@@ -1,28 +1,35 @@
-import bot.core.searching as searching
+import minescript as m
+import bot.core.minescript_extra as m_extra
+
 import bot.core.decision as decision
 import bot.core.movement as move
 import bot.core.mining as mining
-from bot.core.player import player
+from bot.core import player
 
 import bot.modes.descend as descend
 
+
 def run():
-    autoMiner()
-    
-def autoMiner():
+    player.auto_tracking = True
+
     descend.run()
     
-    while not player.stop_tracking:
-        ore_coords, walkable_2d_coords = searching.searchOresLava()
-        
-        cluster = searching.clusters(ore_coords)
-        best_cluster = decision.priorityGroup(cluster)
-        
-        target_coord = (x, _, z) = best_cluster["center"]
-        goal = (x, z)
-        path = decision.AStarPathFinder(walkable_2d_coords, goal)
-        
-        move.goToTarget(path, target_coord)
-        mining.mineCluster(best_cluster["coords"])
+    while (not player.stop_tracking):
+        result = decision.findReachableCluster()
 
+        if (not result):
+            m.echo(f"{m_extra.txt_clr('y')}No reachable clusters found")
+            player.restart = True
+            break
+
+        path, cluster = result
+
+        move.goToTarget(path, cluster["center"])
+        mining.mineCluster(cluster["coords"])
         move.finalizeDescent()
+
+
+
+if __name__ == "__main__":
+    run()
+    

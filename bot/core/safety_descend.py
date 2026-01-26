@@ -4,10 +4,11 @@ import minescript as m
 import bot.core.minescript_extra as m_extra
 import bot.core.movement as move
 import bot.core.constants as C
-from bot.core.player import player
+from bot.core import player
+
 
 #Going down safety
-def scanEnvironment(max_depth:int=7) -> tuple[bool, bool]:
+def scanEnvironment(max_depth:int=14) -> tuple[bool, bool]:
     px, py, pz = player.x, player.y, player.z
     
     pos1 = (px + 1, py + 1, pz + 1)
@@ -33,7 +34,8 @@ def scanEnvironment(max_depth:int=7) -> tuple[bool, bool]:
                 if block.startswith("minecraft:lava"):
                     lava = True
                 
-                if ((dy in (-1, 0, 1)) and (dx == 0) and (dz == 0) and (block.startswith("minecraft:water"))):
+                if (dy in (-1, 0, 1)) and (dx == 0) and (dz == 0) and \
+                   (block.startswith("minecraft:water")):
                     water = True 
                     
     return lava, water
@@ -49,7 +51,7 @@ def inWater() -> None:
                 blocks_around.add((bx, bz))
         return (len(blocks_around) < 3) 
     
-    m.echo('Player IS in WATER!!!')
+    m.echo(f"{m_extra.txt_clr('y')}Player IS in {m_extra.txt_clr('b')}WATER{m_extra.txt_clr('y')}!!!")
     while m.player_get_targeted_block(2) == None: # Player in floor level
         m.player_press_sneak(True)
         time.sleep(C.ONE_TICK_TIME)
@@ -93,17 +95,17 @@ def inWater() -> None:
     time.sleep(C.ONE_TICK_TIME * 6)
     m.player_set_orientation(player.yaw, C.PITCH_LOOK_DOWN)
     
-    while m.getblock(player.x, player.y, player.z).startswith('minecraft:water'):
+    while m.getblock(player.x, player.y, player.z).startswith("minecraft:water"):
         time.sleep(C.ONE_TICK_TIME)
     
     move.StopMovement()    
         
-    m.echo('Player IS NOT more in WATER :D')
+    m.echo(f"{m_extra.txt_clr('g')}Player IS NOT more in {m_extra.txt_clr('b')}WATER")
     m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
 
 
 def closeToLava() -> None:
-    m.echo('Player CLOSE to LAVA!!!')
+    m.echo(f"{m_extra.txt_clr('y')}Player CLOSE to {m_extra.txt_clr('r')}LAVA{m_extra.txt_clr('y')}!!!")
     
     path = []
     
@@ -112,8 +114,10 @@ def closeToLava() -> None:
         m.player_press_forward(True)
     move.StopMovement(mining=True)
     
-    target_coords = m.player_get_targeted_block(1).position
-    dx, _, dz = tuple(coord1 - coord2 for coord1, coord2 in zip(target_coords, (player.x, player.y, player.z)))
+    target_coords = m.player_get_targeted_block(2).position
+    dx, _, dz = tuple(
+        coord1 - coord2 for coord1, coord2 in zip(target_coords, (player.x, player.y, player.z))
+        )
     
     for i in range(4, 1, -1):
         bx, bz = player.x + dx * i, player.z + dz * i
@@ -124,25 +128,25 @@ def closeToLava() -> None:
 
 
 def waterDrop() -> None:
-    m.echo("FALLING!!!")
+    m.echo(f"{m_extra.txt_clr('y')}FALLING!!!")
     
     move.StopMovement()
     m.player_press_sneak(True)
     
     m_extra.select_slot(C.WATER_BUCKET_SLOT, C.BUCKETS_ITEM)
 
-    while (player.y_velocity < C.FALLING_Y_VEL[0]):
+    while (player.y_vel < C.FALLING_Y_VEL[0]):
         m.player_set_orientation(player.yaw, C.PITCH_LOOK_DOWN)
         m_extra.tap_key(m.player_press_use)
     
-    while (not player.main_hand_item.startswith('minecraft:water')) and \
-          (m.getblock(player.x, player.y, player.z)).startswith('minecraft:water'):
+    while (not player.main_hand_item.startswith("minecraft:water")) and \
+          (m.getblock(player.x, player.y, player.z)).startswith("minecraft:water"):
         m_extra.tap_key(m.player_press_use)
 
     move.StopMovement()
     m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
     
-    m.echo('Water Clutch!')
+    m.echo(f"{m_extra.txt_clr('g')}Water Clutch!")
     move.goToCenter()
 
             

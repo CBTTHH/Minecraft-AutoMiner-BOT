@@ -19,7 +19,7 @@ def mineCluster(best_cluster_coords:list[tuple[int]], ore=C.MINING_ORE) -> None:
             time.sleep(C.ONE_TICK_TIME)
     
     m.player_press_attack(False)
-    m.player_press_forward(True) 
+    m.player_press_forward(True)
     m.player_press_jump(True)
     time.sleep(C.ONE_TICK_TIME*8)
     

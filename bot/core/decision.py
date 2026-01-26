@@ -1,21 +1,23 @@
-import math
 from queue import PriorityQueue
 
 import minescript as m
+import bot.core.minescript_extra as m_extra
 import bot.core.searching as searching
-import bot.core.decision as decision
-from bot.core.player import player
+import bot.core.constants as C
+from bot.core import player
 
-def priorityGroup(clusters, ore = 'diamond') -> dict:
+
+def priorityGroup(clusters, ore='diamond', caption=True) -> dict:
     if len(clusters) == 1: 
-        m.echo(f"Going to group of {ore}s at {clusters[0]['center']} (closest)")
+        if caption:
+            m.echo(f"{m_extra.txt_clr('g')}Going to group of {ore}s at {m_extra.txt_clr('a')}{clusters[0]['center']} {m_extra.txt_clr('g')}(closest)")
         return clusters[0]
     
     CLOSE_TO_PLAYER = 10
     
     for cluster in clusters:    # Calculate the distance from the player to the clusters
         x, y, z = cluster['center']
-        dist = math.sqrt((player.x - x)**2 + (player.y - y)**2 + (player.z - z)**2)
+        dist = abs(player.x - x) + abs(player.y - y) + abs(player.z - z)
         cluster['distance'] = dist
     
     clusters_close = [cluster for cluster in clusters if cluster['distance'] <= CLOSE_TO_PLAYER]
@@ -24,24 +26,47 @@ def priorityGroup(clusters, ore = 'diamond') -> dict:
         best_cluster, best_score = clusters_close[0], float("inf")
         
         for cluster in clusters_close:
-            score = (1.5 * cluster['distance']) - (cluster['size'] * 2)
+            score = (C.CLUSTER_SIZE_SCORE * cluster['distance']) - (cluster['size'] * C.CLUSTER_SIZE_SCORE)
             
             if score <= best_score:
                 best_score = score
                 best_cluster = cluster
-        
-        m.echo(f"Going to group of {ore}s at {best_cluster['center']} (closest)")
+        if caption:
+            m.echo(f"{m_extra.txt_clr('g')}Going to group of {ore}s at {m_extra.txt_clr('a')}{best_cluster['center']} {m_extra.txt_clr('g')}(closest)")
         return best_cluster
     
-    #No diamonds close to the player, try to find the largest with with travel less distance
+    # No diamonds close to the player, try to find the largest with with travel less distance
     best_cluster = min(clusters, key=lambda cluster: (-(cluster['size']), cluster['distance']))
-    m.echo(f"Going to group of {ore}s at {best_cluster['center']} (largest and closest)")
+    
+    if caption:
+        m.echo(f"{m_extra.txt_clr('g')}Going to group of {ore}s at {m_extra.txt_clr('a')}{best_cluster['center']} {m_extra.txt_clr('g')}(largest and closest)")
     return best_cluster
 
 
-# A* pathfinder 
+def direction(target_coord:tuple|None) -> tuple[str]:
+    if (not target_coord):
+        return (None, None, None)
+    
+    px, py, pz = player.x, player.y, player.z
+    tx, ty, tz = target_coord
+    
+    zs, xs, ys = "N/S: ", "W/E: ", "UP/DOWN: "
+    dx, dy, dz = abs(px - tx), abs(py - ty) + 1, abs(pz - tz)
+    
+    xs += f"{m_extra.txt_clr("y")}east ({dx})" if px < tx else f"{m_extra.txt_clr("y")}west ({dx})" \
+        if px > tx else f"{m_extra.txt_clr("g")}same"
+    zs += f"{m_extra.txt_clr("y")}south ({dz})" if pz < tz else f"{m_extra.txt_clr("y")}north ({dz})" \
+        if pz > tz else f"{m_extra.txt_clr("g")}same"
+    ys += f"{m_extra.txt_clr("y")}up ({dy})" if py < ty else f"{m_extra.txt_clr("y")}down ({dy})" \
+        if py > ty else f"{m_extra.txt_clr("g")}same"
+    
+    direction = (zs, xs, ys)
+    return direction
+    
+
+## A* PATHFINDER
 def safely_transf_3D_to_2D(lava_coords:set[tuple], region:set[tuple]) -> set[tuple]:
-    CRITICALS = (ABOVE_Y, PLAYER_HEAD_Y, PLAYER_Y, BOTTOM_Y) = (player.y + dy for dy in [2, 1, 0, -1]) # (-56, -57, -58, -59) normally
+    CRITICALS = (_, PLAYER_HEAD_Y, PLAYER_Y, _) = (player.y + dy for dy in [2, 1, 0, -1]) # (-56, -57, -58, -59) normally
     
     columns = {}
     walkable_2D = set()
@@ -94,7 +119,12 @@ def h(pos: tuple[int, int], end_pos: tuple[int, int]) -> int:
     return abs(x2 - x1) + abs(z2 - z1)
 
 
-def AStarPathFinder(grid_2d:set[tuple], goal:tuple[int, int], next_searching_r:int = 32) -> list[tuple]:
+def AStarPathFinder(
+    grid_2d:set[tuple], 
+    goal:tuple[int, int], 
+    next_searching_r=24
+    ) -> list[tuple]:
+    
     NEIGHBOR_BLOCK = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     
     start = (player.x, player.z)
@@ -139,20 +169,42 @@ def AStarPathFinder(grid_2d:set[tuple], goal:tuple[int, int], next_searching_r:i
                 open_set.put((f_score[neighbor], h(neighbor, goal), neighbor))
                 inverse_path[neighbor] = curr_coord
     
-    if not found:
-        m.echo("Path not found, increasing region")
-        
-        diamond_coords, walkable_2D = searching.searchOresLava(next_searching_r)
-        best_cluster = decision.priorityGroup(searching.clusters(diamond_coords))
-        
-        (x, _, z) = best_cluster['center']
-        goal = (x, z)
-        
-        return AStarPathFinder(walkable_2D, goal, next_searching_r + 4)
+    if not found:    
+        m.echo(f"{m_extra.txt_clr('r')}Path not found...")
+        return None
     
     path = []
     while goal != start:
         path.append(goal)
         goal = inverse_path[goal]
-    
+    path.append(start)
+
     return path
+
+
+## PATH HANDLING
+def findReachableCluster(r=16, step=4):
+    invalid_coords = set()
+
+    while r <= C.MAX_SEARCHING_RADIUS:
+        ore_coords, lava_coord, region_coords = searching.searchOresLava(r)
+        ore_coords -= invalid_coords
+
+        walkable_2d_coords = findingMinableNodes(lava_coord, region_coords)
+        
+        clusters = searching.clusters(ore_coords)
+        best_cluster = priorityGroup(clusters)
+        
+        goal = (best_cluster["center"][0], best_cluster["center"][2])
+        path = AStarPathFinder(walkable_2d_coords, goal)
+        
+        if r >= C.MAX_PATH_SEARCHING_RADIUS:
+            invalid_coords |= (set(best_cluster["coords"]))
+
+        if path:
+            return path, best_cluster
+
+        r += step
+
+    return None, None
+

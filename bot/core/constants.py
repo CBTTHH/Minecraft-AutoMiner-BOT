@@ -35,7 +35,8 @@ BLOCKS_ITEM = {"minecraft:cobblestone",
                "minecraft:deepslate",               
                "minecraft:diorite", 
                "minecraft:granite",
-               "minecraft:sandstone"}
+               "minecraft:sandstone"
+               "minecraft:tuff"}
 
 FOOD_ITEMS = {"minecraft:cooked_beef", 
               "minecraft:cooked_chicken", 
@@ -46,33 +47,54 @@ FOOD_ITEMS = {"minecraft:cooked_beef",
               "minecraft:pumpkin_pie"}
 
 PICKAXES = {"minecraft:wooden_pickaxe",
-                 "minecraft:stone_pickaxe",
-                 "minecraft:iron_pickaxe",
-                 "minecraft:copper_pickaxe",
-                 "minecraft:golden_pickaxe",
-                 "minecraft:diamond_pickaxe",
-                 "minecraft:netherite_pickaxe"}
+            "minecraft:stone_pickaxe",
+            "minecraft:iron_pickaxe",
+            "minecraft:copper_pickaxe",
+            "minecraft:golden_pickaxe",
+            "minecraft:diamond_pickaxe",
+            "minecraft:netherite_pickaxe"}
 
 SHOVELS = {"minecraft:wooden_shovel",
-                 "minecraft:stone_shovel",
-                 "minecraft:iron_shovel",
-                 "minecraft:copper_shovel",
-                 "minecraft:golden_shovel",
-                 "minecraft:diamond_shovel",
-                 "minecraft:netherite_shovel"}
+           "minecraft:stone_shovel",
+           "minecraft:iron_shovel",
+           "minecraft:copper_shovel",
+           "minecraft:golden_shovel",
+           "minecraft:diamond_shovel",
+           "minecraft:netherite_shovel"}
+
+WEAPONS = {"minecraft:wooden_sword",
+           "minecraft:stone_sword",
+           "minecraft:iron_sword",
+           "minecraft:copper_sword",
+           "minecraft:golden_sword",
+           "minecraft:diamond_sword",
+           "minecraft:netherite_sword"
+           
+           "minecraft:wooden_axe",
+           "minecraft:stone_axe",
+           "minecraft:iron_axe",
+           "minecraft:copper_axe",
+           "minecraft:golden_axe",
+           "minecraft:diamond_axe",
+           "minecraft:netherite_axe"
+           
+           "minecraft:crossbow"
+           "minecraft:bow"}
 
 BUCKETS_ITEM = {"minecraft:water_bucket",
                 "minecraft:bucket"}
 
-HAND_ITEMS = FOOD_ITEMS.union(BLOCKS_ITEM).union(BLOCKS_ITEM).union(BUCKETS_ITEM)
+HAND_ITEMS = FOOD_ITEMS.union(BLOCKS_ITEM).union(BLOCKS_ITEM).union(BUCKETS_ITEM).union(WEAPONS)
 
-#TIMINGS
+#TIMINGS (seconds)
 ONE_TICK_TIME = 0.05
+STUCK_TIMEOUT = 3
+
 
 #PLAYER PHYSICS
-GROUND_Y_VEL = (-0.0785, 0.0)
+GROUND_Y_VEL = (-0.1556, 0.0)
 FALLING_Y_VEL = (-0.66, -3.92)
-STANDING_X_Z_VEL = 0.0
+STANDING_X_Z_VEL = 0.035
 MAX_WALKING_VEL = 0.117859
 
 
@@ -83,7 +105,7 @@ YAW_FACING_EAST = -90
 YAW_FACING_WEST = 90
 PITCH_LOOK_UP = -90
 PITCH_LOOK_DOWN = 90
-PITCH_LOOK_AHEAD = 25.7
+PITCH_LOOK_AHEAD = 27.5
 PITCH_LOOK_INCLINED_DOWN = 30
 PITCH_LOOK_INCLINED_UP = -60
 
@@ -108,14 +130,21 @@ COORDS_OFFSET = 0.5
 
 #PRIORITY RATING
 CLUSTER_DISTANCE_SCORE = 1.5
-CLUSTER_SIZE_SCORE = 2
+CLUSTER_SIZE_SCORE = 2.3
 
 #SAFETY
 Y_LEVEL_LAVA_CHECK = (-59, -56)
 
 #MINING
+MINING_Y_LEVEL = (-57, -58)
+FLOOR_Y_LEVEL = -59
 INVALID_Y_LEVEL = (-60, -64)
 Y_LEVEL_LAVA_PUDDLE = -55
+MAX_SEARCHING_RADIUS = 32
+MAX_PATH_SEARCHING_RADIUS = 24
+
+#SCANNING
+MAX_SCAN_Y_LEVEL = 15 # Prevents lag and excessive consumption of resources
 
 
 

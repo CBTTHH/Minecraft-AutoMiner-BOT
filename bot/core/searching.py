@@ -1,9 +1,9 @@
 import minescript as m
+import bot.core.minescript_extra as m_extra
 import bot.core.constants as C
-from bot.core.decision import findingMinableNodes
-from bot.core.player import player
+from bot.core import player
 
-def searchOresLava(r=16, ore='diamond') -> tuple[set[tuple], set[tuple]]:
+def searchOresLava(r=16, step=4, ore="diamond", caption=True) -> tuple[set[tuple], set[tuple], set[tuple]]:
     sx, sy, sz = player.x, player.y, player.z
     
     prev_r = 0    
@@ -18,7 +18,8 @@ def searchOresLava(r=16, ore='diamond') -> tuple[set[tuple], set[tuple]]:
         pos1 = (sx - r, min_y, sz - r)
         pos2 = (sx + r, sy + r, sz + r)
         
-        m.await_loaded_region(sx - r, sz - r, sx + r, sz + r)
+        m.await_loaded_region(sx - r, sz - r, 
+                              sx + r, sz + r)
         
         region = m.get_block_region(pos1, pos2)
         
@@ -37,20 +38,21 @@ def searchOresLava(r=16, ore='diamond') -> tuple[set[tuple], set[tuple]]:
                     
                     if block.endswith(f"{ore}_ore"):
                         ores_coords.add(coord)
-                    elif block.startswith("minecraft:lava") and (C.Y_LEVEL_LAVA_CHECK[0] <= y <= C.Y_LEVEL_LAVA_CHECK[1]):
+                    elif (block.startswith("minecraft:lava")) and \
+                         (C.Y_LEVEL_LAVA_CHECK[0] <= y <= C.Y_LEVEL_LAVA_CHECK[1]):
                         lava_coords.add(coord)
                         
         if ores_coords:
-            return ores_coords, findingMinableNodes(lava_coords, region_coord)
-        
-        if prev_r == 32:
-            m.echo("Error: couldn't find a path")
-            
-        prev_r = r
-        r += 4
-        m.echo(f"No {ore}s nearby, increasing searching radius to a offset of {r}")
-    
+            return ores_coords, lava_coords, region_coord
 
+        if r >= C.MAX_SEARCHING_RADIUS:
+            player.restart = True
+        
+        prev_r = r
+        r += step
+        if caption: 
+            m.echo(f"{m_extra.txt_clr('y')}No {ore}s nearby, increasing searching radius to a offset of {m_extra.txt_clr('p')}{r}")
+    
 
 def clusters(ores_coords:set) -> list[dict]:
     clusters = []
