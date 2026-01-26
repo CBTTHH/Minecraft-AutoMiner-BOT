@@ -41,9 +41,9 @@ def select_slot(slot:int ,items:Iterable[str]) -> None:
         time.sleep(C.ONE_TICK_TIME)
         
         
-def tap_key(action_key) -> None:
+def tap_key(action_key, t=C.ONE_TICK_TIME) -> None:
     action_key(True)
-    time.sleep(C.ONE_TICK_TIME * 2)
+    time.sleep(t)
     action_key(False)
     
 

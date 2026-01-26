@@ -24,7 +24,7 @@ class PlayerTracker:
         self.off_hand_item:str = ''
         
         self.lava_around = set()
-        self.restart = False
+        self._restart = False
         self.stop_tracking = False
         
         self._last_time_movement = time.time()
@@ -75,7 +75,7 @@ class PlayerTracker:
             
     def tool_in_main_hand(self):
         while (not self.stop_tracking):
-            time.sleep(C.ONE_TICK_TIME * 2)
+            time.sleep(C.ONE_TICK_TIME)
             
             if (not self.auto_tracking):
                 continue
@@ -91,7 +91,6 @@ class PlayerTracker:
             
             if self.main_hand_item:
                 if self.main_hand_item in C.HAND_ITEMS:
-                    time.sleep(C.ONE_TICK_TIME * 2)
                     continue
 
                 if m.player_get_targeted_block(5):
@@ -168,8 +167,11 @@ class PlayerTracker:
                 m.echo(f"{m_extra.txt_clr('r')}\nPLAYER HAS LOW HEALTH... RECOVER AND TRY AGAIN\n")
                 stop()
             
-            elif (time_stuck > C.STUCK_TIMEOUT * 2.5) or (self.restart):
+            elif (time_stuck > C.STUCK_TIMEOUT * 2.5):
+                if (not self._restart):
+                    continue
                 if self.targeted_block and self.targeted_block.type.endswith(f"{C.MINING_ORE}_ore"):
                     continue
+                
                 restart()
                 self.stop_tracking = True    

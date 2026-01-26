@@ -7,7 +7,7 @@ import bot.core.minescript_extra as m_extra
 from bot.core.restart import restart
 
 MODES = { 
-    "descend": (m.execute, "\\bot\\modes\\test"),
+    "descend": (m.execute, "\\bot\\modes\\descend"),
     "auto": (m.execute, "\\bot\\modes\\auto_miner"),
     "scan": (m.execute, "\\bot\\modes\\scan_only"),
     "stop": (m_extra.kill_jobs, None),
@@ -72,9 +72,9 @@ def main():
             event = events.get()
             
             if event.type == m.EventType.OUTGOING_CHAT_INTERCEPT:
-                message = event.message.strip()
+                message = event.message.strip().lower()
                 
-                if ".bot stop all" == message.lower():
+                if ".bot stop all" == message:
                     m.echo(f"{m_extra.txt_clr('g')}STOPPING SCRIPT...")
                     stop_flag = True
 
