@@ -23,7 +23,7 @@ def disableSprint() -> None:
     m.player_press_forward(True)
     
     time.sleep(C.ONE_TICK_TIME*5)
-    if (round(math.hypot(player.x_vel, player.z_vel)) > C.MAX_WALKING_VEL):
+    if (round(math.hypot(player.x_vel, player.z_vel), 5) > C.MAX_WALKING_VEL):
         m.player_press_sprint(True)
         time.sleep(C.ONE_TICK_TIME)
         

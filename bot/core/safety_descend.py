@@ -136,7 +136,7 @@ def waterDrop() -> None:
     m.player_inventory_select_slot(C.WATER_BUCKET_SLOT)
     m_extra.select_slot(C.WATER_BUCKET_SLOT, C.BUCKETS_ITEM)
 
-    while (player.y_vel < C.FALLING_Y_VEL[0]):
+    while (player.y_vel < C.FALLING_Y_VEL[0]) and (player.main_hand_item.startswith("minecraft:water")):
         m.player_set_orientation(player.yaw, C.PITCH_LOOK_DOWN)
         m_extra.tap_key(m.player_press_use, C.ONE_TICK_TIME / 4)
     
