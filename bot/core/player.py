@@ -171,6 +171,7 @@ class PlayerTracker:
                 if (not self._restart):
                     continue
                 if self.targeted_block and self.targeted_block.type.endswith(f"{C.MINING_ORE}_ore"):
+                    self._last_time_movement = time.time()
                     continue
                 
                 restart()
