@@ -11,15 +11,14 @@ import bot.modes.descend as descend
 
 def run():
     player.auto_tracking = True
-
     descend.run()
+    player._restart = True
     
     while (not player.stop_tracking):
         result = decision.findReachableCluster()
 
         if (not result):
             m.echo(f"{m_extra.txt_clr('y')}No reachable clusters found")
-            player.restart = True
             break
 
         path, cluster = result
