@@ -1,8 +1,8 @@
 # Minecraft Auto-Miner Bot (v1.0) 🤖
 
 > **Note:**  ⚠️  
-> This branch has **version 1.0 (stable)** of the Minecraft Auto-Miner agent.  
-> Active development for **version 2.0 (in process)** is happening on `v2-dev` branch.
+> This branch has **Release v1.0** of the Minecraft Auto-Miner agent.  
+> Branch **Release v2.0** has the full and final autonomous auto-miner with modular architecture and documentation.
 
 ---
 
