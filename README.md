@@ -1,7 +1,7 @@
 # Minecraft Auto-Miner Bot (v2.0)
 
 > **Note**
-> This branch contains **release v2.0**, a major architectural refactor of the project.
+> This branch contains **release v2.0**, a major architectural refactor of the project.  
 > The old, stable and fully working **version (v1.0)** is available on the **release v1.0** branch.
 
 ---
