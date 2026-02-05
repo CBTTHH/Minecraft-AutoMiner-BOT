@@ -1,211 +1,209 @@
-# Minecraft Auto-Miner Bot (v2.0) 
+# Minecraft Auto-Miner Bot (v2.0)
 
-> **Note:**   
-> This branch contains **version 2.0**, a major architectural refactor of the project.  
-> The stable, fully working **version (v1.0)** is available on the **main** branch.
+> **Note**
+> This branch contains **release v2.0**, a major architectural refactor of the project.
+> The old, stable and fully working **version (v1.0)** is available on the **release v1.0** branch.
 
---- 
+---
+
+## Overview
+
+The **Minecraft Auto-Miner Bot** is a fully autonomous mining bot built on top of the **MineScript** mod.
+It is designed to safely and efficiently mine resources underground while reacting to hazards such as lava,
+hostile entities, low health, or movement stalls.
+
+This project focuses on:
+
+* Reliability during long mining sessions
+* Clear separation between decision-making and execution
+* Safe automation with automatic recovery and restart logic
+
+The bot is modular, extensible, and designed similarly to real-world robotics and game AI systems.
+
+---
+
+## Requirements
+
+* Minecraft (Fabric / Forge / NeoForge)
+* **MineScript 4.0+**
+* Python 3.9-3.x
+
+MineScript can be downloaded from:
+
+* [https://modrinth.com/mod/minescript](https://modrinth.com/mod/minescript)
+* [https://www.curseforge.com/minecraft/mc-mods/minescript](https://www.curseforge.com/minecraft/mc-mods/minescript)
+
+---
+
+## Installation
+
+1. Install **MineScript** for your Minecraft version
+2. Launch Minecraft once to generate the `minescript` folder
+3. Copy this [/bot](/bot) folder into:
+
+   ```
+   # Before
+   .minecraft/minescript/
+
+   # After
+   .minecraft/minescript/bot
+   ```
+4. Ensure the folder structure matches the project layout
+
+---
+
+## Usage
+
+### Start the Bot
+
+From the Minecraft chat, type:
+
+```
+\bot\main
+```
+
+### Available Commands  
+
+Type these commands in chat:  
+```
+.bot <mode>      # Commands usage
+```
+
+```
+.bot auto        # Start full autonomous mining
+.bot descend     # Only descend to target Y-level
+.bot scan        # Scan ores without mining
+.bot restart     # Restart the bot safely
+.bot stop        # Stop current bot jobs
+.bot stop all    # Stop all MineScript jobs including main
+.bot help        # Show help commands
+```
+
+---
+
+## Notes & Warnings
+
+* Designed for **single-player or controlled environments**
+* Use at your own risk on multiplayer servers
+* Automatic safety logic may interrupt/stop mining when hazards are detected
+
+---
 
 ## System Architecture
 
-![Architecture Diagram](bot/docs/ArchitectureDiagram.drawio.svg)  
-This diagram shows the separation between high-level systems (modes)
-and low-level systems (core). Modes decide what the player do, while core systems
-execution interact with the MineScript API.
+![Architecture Diagram](bot/docs/ArchitectureDiagram.drawio.svg)
+
+The architecture is split into two layers:
+
+* **Core systems**: low-level execution and sensing
+* **Modes**: high-level behaviors composed from core systems
 
 ---
 
-## Overview 
-**Version 2.0** is a full architectural redesign of the original Minecraft Auto-Miner Bot.  
-This version is not only have more features; it focuses on improving clarity, scalability, testability, and
-performance reasoning.
+## Features
 
-The project transitions from a single messy and compacted script (`mod.py`) to a modular, system oriented
-bot framework, inspired by real world game AI, robotics, and software engineering systems.
+### Autonomous Mining
 
----
+* Automatically descends to a target Y-level (default: **Y = -58**)
+* Scans for nearby ore clusters
+* Prioritizes and mines the best reachable cluster
+* Repeats the process indefinitely
 
-## From Monolithic Script to Modular System
+### Safety & Hazard Detection
 
-### Before (v1.0 — mod.py)
-- One large file containing:
-  - player tracking
-  - movement
-  - safety logic
-  - ore searching
-  - decision-making
-  - mining
-  - mode control
-- Logic tightly coupled
-- Difficult to debug or test
-- Hard to reuse or extend functionality
+* Lava detection in the surrounding area
+* Hostile entity detection
+* Health monitoring
+* Tool and weapon state detection
+* Automatic shutdown or recovery when danger is detected
 
-### Now (v2.0 — `bot/`)
-bot/  
-├── core/        # Low-level systems  
-├── modes/       # High-level systems  
-├── test/        # Isolated test scripts  
-└── main.py      # Entry point  
+### Stuck Detection & Recovery
 
-### Why this matters
-- Each component has one responsibility
-- Systems can be modified or replaced independently
-- Mirrors real-world projects architectures
-- Enables better experimentation and optimization
+* Detects lack of positional progress over time
+* Differentiates between being stuck and slow mining
+* Attempts local recovery before restarting
+* Automatically restarts the bot if recovery fails
+
+### Modular Command System
+
+* Chat-based command interface (`.bot <mode>`)
+* Run, stop, or restart modes without restarting Minecraft
+* Supports isolated testing modes
 
 ---
 
-## Separation of Responsibilities
+## Algorithms & Techniques
 
-### Low-Level Systems (`core/`)
-Low-level systems are how actions individual actions, not what the bot decides to do in the execution.
-| File                 | Responsibility                                                |
-| -------------------- | --------------------------------------------------------------|
-| `player.py`          | Player state tracking (health, position, velocity, rotation)  |
-| `movement.py`        | Movement primitives (center, descend, move, stop, unstuck)    |
-| `safety.py`          | Awareness behaviors (water, lava, falling)                    |
-| `searching.py`       | Ore detection and clustering                                  |
-| `decision.py`        | Cluster scoring and priority selection                        |
-| `mining.py`          | Mining execution                                              |
-| `constants.py`       | Physics, thresholds, timings, slots, etc.                     |
+### Shell / Frontier Expansion Search
 
-- Reusable across multiple behaviors
-- Enables isolation testing
+Instead of rescanning entire regions repeatedly, the bot explores only the boundary between known and unknown blocks.
+This significantly reduces redundant checks and improves performance.
 
----
+### Ore Clustering
 
-## High-Level systems (`modes/`)
-Modes are what the bot is trying to accomplish after execution, using the core systems.
+Detected ore blocks are grouped into clusters based on spatial proximity.
+Clusters are scored and prioritized instead of mining single blocks blindly.
 
-| File            | Purpose                                                            |
-| --------------- | -------------------------------------------------------------------|
-| `descend.py`    | Safely mine down to target Y (Y-level -58 is the default value)    |
-| `scan_only.py`  | Scan ores without mining (return diamonds coords and best cluster) |
-| `auto_miner.py` | Full autonomous mining loop (descend, scan, and mine)              |
+### Reachability Filtering
 
-### Why this matters
-- Modes are changeable depending on the user needs
-- Behavior changes don’t affect low-level systems
-- Better structure and organization
+Before committing to a cluster, the bot verifies that it is physically reachable
+based on current terrain and player position.
+
+### Path Mining (unsing A* algorithm)
+
+The bot mines a clear path toward the target cluster, ensuring:
+
+* Stable footing
+* Proper floor placement
+* Centered player movement
+
+### Autonomous Restart Logic
+
+If the bot becomes irrecoverably stuck or encounters unsafe conditions,
+it safely shuts down current jobs and restarts a fresh execution cycle.
 
 ---
 
-## Explicit Execution Flow
-### Before
-- Execution happened implicitly inside mod.py
-- Hard to understand control flow
-- Tightly coupled logic (different parts of a system are highly dependent on each other's)
+## Project Structure
 
-### Now
-- Explicit entry points  
-- main.py or test scripts decide what to run independently
-- Clear start -> behavior -> finish flow
+```
+bot/
+├── core/        # Low-level systems (movement, safety, mining, decision)
+├── modes/       # High-level behaviors (auto, descend, scan)
+├── test/        # Isolated test scripts
+├── docs/        # Architecture diagrams
+└── main.py      # Entry point
+```
 
-Example:  
+### Core Systems (`bot/core`)
 
-`import bot.modes.descend as descend`  
-`  descend.run()`
+| File               | Responsibility                                            |
+| ------------------ | --------------------------------------------------------- |
+| `player.py`        | Player state tracking (position, velocity, health, tools) |
+| `movement.py`      | Movement primitives and path execution                    |
+| `mining.py`        | Block breaking and cluster mining                         |
+| `decision.py`      | Cluster scoring and selection                             |
+| `safety_mining.py` | Hazard handling and emergency logic                       |
+| `constants.py`     | Physics, timings, thresholds                              |
 
-This makes the system easier to reason about, debug, and extend.
+### Modes (`bot/modes`)
 
----
-
-## Testability Added (test/ Folder)
-New capabilities:
-- Run partial systems without full automation
-- Debug player tracking independently
-- Easier debugging of low-level systems
-- Compare old vs new approaches safely
-
-This was **not** possible with the v1.0 monolithic design.
-
----
-
-## Centralized Constants & Physics Tuning
-### Before
-- Magic numbers scattered across files
-- Unsafe tuning
-- Hard to reason about physics behavior
-
-### Now (`core/constants.py`)
-All parameters are documented and centralized:
-- Tick timing
-- Physics thresholds
-- Yaw/pitch values
-- Inventory slots
-- Mining parameters
-
-Example:  
-`FALLING_Y_VEL = (-0.6, -3.92)`  
-`STOP_Y_LEVEL = -58`  
-`MAX_CENTER_OFFSET = (0.01, 0.017)`  
-
-### Benefits
-- Safe experimentation
-- Easier changing
-- Cleaner logic everywhere
+| Mode      | Description                                   |
+| --------- | --------------------------------------------- |
+| `descend` | Safely mines down to target Y-level           |
+| `scan`    | Scans and reports ore clusters without mining |
+| `auto`    | Fully autonomous mining loop                  |
 
 ---
 
-## Background Player Tracking System
-### Before
-- Player state queried inline
-- Repeated API calls
-- Mixed with decision logic
+## Author  
 
-### Now 
-- Maintains:
-  - health
-  - position
-  - velocity
-  - yaw
-  - tool state
-- Other systems read, not query
-- Auto-stop upon detecting dangerous situations (enemies, lava, low health)
-
-This design has characteristics:  
-- Game engines
-- Entity Component System (ECS) architectures
-
----
-
-## Performance Reasoning Improvements
-This v2.0 has faster algorithms and enables performance understanding:
-- Decisions are data-driven
-  - uses shell / frontier expansion algorithm
-  - instead of re-checking everything, explore the new boundary between known and unknown space
-- Optimization is targeted
-  - cache-friendly
-  - no repeats
-
-Optimization focuses on reducing loop calls - went from `O(n^3)` to `O(number of blocks checked)`  
-This way of reasoning is better than v1.0.
-
----
-
-## Designed for Future Growth
-This architecture enables future additions such as:  
-- Pathfinding systems (**A***)
-- Memory allocation of blocks of data directly from Minecraft
-- Behavior trees
-- ML-based decision scoring
-
----
-
-## Summary
-**Version 2.0** replaces the original `mod.py` with a modular bot architecture.  
-Low-level systems handle individual actions such as states, movement, safety, and decision-making, while high-level
-systems define behavior.  
-
-This refactor prioritizes clarity, extensibility, testability, and performance logic, laying on AI-driven automation.  
-
----
-
-## Author
-CBTTHH  
+**CBTTHH**  
 Computer Science student  
-GitHub: https://github.com/CBTTHH  
-YouTube: https://www.youtube.com/@CBTTHH  
+GitHub: [https://github.com/CBTTHH](https://github.com/CBTTHH)  
+YouTube: [https://www.youtube.com/@CBTTHH](https://www.youtube.com/@CBTTHH)  
+
+Making projects just for fun! :D
 
 
 
