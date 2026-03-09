@@ -82,7 +82,7 @@ def inWater() -> None:
     bx, by, bz = player.x, player.y + 2, player.z
     
     m.player_press_jump(True)
-    time.sleep(C.ONE_TICK_TIME * 11)
+    time.sleep(C.ONE_TICK_TIME * 14)
     m.player_press_jump(False)
     
     m.player_press_sneak(True)
@@ -101,7 +101,7 @@ def inWater() -> None:
     move.StopMovement()    
         
     m.echo(f"{m_extra.txt_clr('g')}Player IS NOT more in {m_extra.txt_clr('b')}WATER")
-    m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
+    m.player_inventory_select_slot(C.PICKAXE_SLOT)
 
 
 def closeToLava() -> None:
@@ -138,7 +138,7 @@ def waterDrop() -> None:
 
     while (player.y_vel < C.FALLING_Y_VEL[0]):
         m.player_set_orientation(player.yaw, C.PITCH_LOOK_DOWN)
-        m_extra.tap_key(m.player_press_use, C.ONE_TICK_TIME / 4)
+        m_extra.tap_key(m.player_press_use, C.ONE_TICK_TIME)
         
         if (not player.main_hand_item.startswith("minecraft:water")):
             break

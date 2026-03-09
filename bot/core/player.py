@@ -75,7 +75,7 @@ class PlayerTracker:
             
     def tool_in_main_hand(self):
         while (not self.stop_tracking):
-            time.sleep(C.ONE_TICK_TIME)
+            time.sleep(C.ONE_TICK_TIME / 10)
             
             if (not self.auto_tracking):
                 continue
