@@ -65,7 +65,7 @@ def run_movement() -> None: # ✅
 def run_searching_and_decision() -> tuple[dict, list]: # ✅
     start_time = time.perf_counter()
     diamond_coords, lava_coord, region_coords = searching.searchOresLava()
-    walkable_2d_coords = decision.findingMinableNodes(lava_coord, region_coords)
+    walkable_2d_coords = decision._findingMinableNodes(lava_coord, region_coords)
     end_time = time.perf_counter()
     time1 = end_time - start_time
     
@@ -75,7 +75,7 @@ def run_searching_and_decision() -> tuple[dict, list]: # ✅
     time2 = end_time_cluster - start_time_cluster
     
     start_time_decision = time.perf_counter()
-    best_cluster = decision.priorityGroup(cluster)
+    best_cluster = decision._priorityGroup(cluster)
     end_time_decision = time.perf_counter()
     time3 = end_time_decision - start_time_decision
     
@@ -83,7 +83,7 @@ def run_searching_and_decision() -> tuple[dict, list]: # ✅
     
     start_time_path_finding = time.perf_counter()
     goal = (x, z)
-    path = decision.AStarPathFinder(walkable_2d_coords, goal)
+    path = decision._AStarPathFinder(walkable_2d_coords, goal)
     pyperclip.copy(path)
     end_time_path_finding = time.perf_counter()
     time4 = end_time_path_finding - start_time_path_finding

@@ -20,7 +20,7 @@ def run():
         
         ore_coords, _, _ = searching.searchOresLava(caption=False)
         cluster = searching.clusters(ore_coords)
-        best_cluster = decision.priorityGroup(cluster, caption=False)
+        best_cluster = decision._priorityGroup(cluster, caption=False)
         
         cx, cy, cz = best_cluster.get("center", None)
         n_diamonds = len(best_cluster['coords'])

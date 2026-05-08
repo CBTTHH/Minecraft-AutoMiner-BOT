@@ -23,5 +23,3 @@ def restart(cmd:str="\\bot\\modes\\auto_miner") -> None:
         if (job.command == ["bot\\main"]) or (job.job_id == new_job_id):
             continue
         m.execute(f"\\killjob {job.job_id}")
-    
-    
