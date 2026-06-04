@@ -176,7 +176,7 @@ def goToTarget(path:list[tuple], target_coord:tuple[int]=None) -> None:
     
     def checkFloor(floor_y_level=C.FLOOR_Y_LEVEL) -> None:
         if m.getblock(path_x, floor_y_level, path_z).endswith("air"):
-            bx, by, bz = (axis + C.COORDS_OFFSET for axis in (path_x, C.FLOOR_Y_LEVEL, path_z))
+            bx, by, bz = tuple(axis + C.COORDS_OFFSET for axis in (path_x, C.FLOOR_Y_LEVEL, path_z))
             m.player_look_at(bx, by, bz)
             
             StopMovement(using=True)
@@ -210,8 +210,7 @@ def goToTarget(path:list[tuple], target_coord:tuple[int]=None) -> None:
     
     while path:
         path_x, path_z = path.pop()
-        
-        m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
+        # m_extra.select_slot(C.PICKAXE_SLOT, C.PICKAXES)
         
         for path_y in mining_y_level:
             if m.getblock(path_x, path_y, path_z).endswith("air"):
@@ -219,6 +218,7 @@ def goToTarget(path:list[tuple], target_coord:tuple[int]=None) -> None:
                 continue
             
             m.player_look_at(path_x + C.COORDS_OFFSET, path_y + C.COORDS_OFFSET, path_z + C.COORDS_OFFSET)
+            m.player_inventory_select_slot(C.PICKAXE_SLOT)
             
             m.player_press_attack(True)
             while (not m.getblock(path_x, path_y, path_z).endswith("air")):

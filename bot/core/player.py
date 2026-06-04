@@ -70,7 +70,7 @@ class PlayerTracker:
                 self._last_time_movement = time.time()
                 self._last_pos = current_pos
             
-            time.sleep(C.ONE_TICK_TIME / 2)
+            time.sleep(C.ONE_TICK_TIME / 10)
             
             
     def tool_in_main_hand(self):

@@ -16,7 +16,7 @@ def _priorityGroup(clusters, ore=C.MINING_ORE, caption=True) -> dict:
     CLOSE_TO_PLAYER = 10
     
     # Calculate the distance from the player to the clusters
-    for cluster in clusters:    
+    for cluster in clusters: 
         x, y, z = cluster['center']
         dist = abs(player.x - x) + abs(player.y - y) + abs(player.z - z)
         cluster['distance'] = dist
