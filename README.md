@@ -198,17 +198,10 @@ bot/
 
 ## Author  
 
-**CBTTHH**  
+**SH1FTEDWASTAKEN**  
 Computer Science student  
-GitHub: [https://github.com/CBTTHH](https://github.com/CBTTHH)  
-YouTube: [https://www.youtube.com/@CBTTHH](https://www.youtube.com/@CBTTHH)  
+GitHub: [https://github.com/sh1ftedwastaken](https://github.com/sh1ftedwastaken)  
+YouTube: [https://www.youtube.com/@sh1ftedwastaken](https://www.youtube.com/@sh1ftedwastaken)  
 
 Making projects just for fun! :D
-
-
-
-
-
-
-
 
