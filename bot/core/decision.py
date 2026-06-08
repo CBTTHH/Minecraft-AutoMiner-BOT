@@ -27,7 +27,7 @@ def _priorityGroup(clusters, ore=C.MINING_ORE, caption=True) -> dict:
         best_cluster, best_score = clusters_close[0], float("inf")
         
         for cluster in clusters_close:
-            score = (C.CLUSTER_SIZE_SCORE * cluster['distance']) - (cluster['size'] * C.CLUSTER_SIZE_SCORE)
+            score = (C.CLUSTER_DISTANCE_SCORE * cluster['distance']) - (cluster['size'] * C.CLUSTER_SIZE_SCORE)
             
             if score <= best_score:
                 best_score = score

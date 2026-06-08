@@ -46,7 +46,7 @@ def searchOresLava(r=16, step=4, ore=C.MINING_ORE, caption=True) -> tuple[set[tu
             return ores_coords, lava_coords, region_coord
 
         if r >= C.MAX_SEARCHING_RADIUS:
-            player.restart = True
+            player._restart = True
         
         prev_r = r
         r += step

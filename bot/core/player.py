@@ -158,8 +158,8 @@ class PlayerTracker:
                 safety.lavaSave()
                 stop()
             
-            elif (self.main_hand_item) and (self.main_hand_item.endswith("sword")) or \
-                 (self.main_hand_item.endswith("_axe")):
+            elif (self.main_hand_item) and (self.main_hand_item.endswith("sword") or \
+                 self.main_hand_item.endswith("_axe")):
                 m.echo(f"{m_extra.txt_clr('r')}\nPLAYER PULLET OUT HIS COMBAT WEAPON\n")
                 stop()
                 
