@@ -289,9 +289,9 @@ The bot has three layers of safety: descent-specific hazard handlers, a mining e
 
 ## 📌 Author & Credits
 
-**SH1FTEDWASTAKEN**
-Computer Science student | Open-Source Developer
-GitHub: [https://github.com/sh1ftedwastaken](https://github.com/sh1ftedwastaken)
-YouTube: [https://www.youtube.com/@sh1ftedwastaken](https://www.youtube.com/@sh1ftedwastaken)
+**SH1FTEDWASTAKEN**  
+Computer Science student | Open-Source Developer  
+GitHub: [https://github.com/sh1ftedwastaken](https://github.com/sh1ftedwastaken)  
+YouTube: [https://www.youtube.com/@sh1ftedwastaken](https://www.youtube.com/@sh1ftedwastaken)  
 
-▎ Making projects just for fun! :D
+▎ Making projects just for fun! :D  
